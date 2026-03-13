@@ -1,0 +1,28 @@
+ #include<stdio.h>
+    #include<stdlib.h>
+    int globvar=10;
+    int unglobvar;
+    int product()
+     {
+   printf("\n i am in the function product");
+    return 6*7;
+   }
+   int main()
+   {
+  int stvar=5;
+  int *p;
+  p=(int *)malloc(sizeof(int));
+  *p=20;
+  printf("\n heap memory: %p",p);
+  printf("\n heap memory data : %d",*p);
+   printf("\nstack memory : %p",&stvar);
+   printf("\nstack memory: %d", stvar);
+  printf("\n initialized variable: %p", &globvar);
+   printf("\n initialized variable data: %d", globvar);
+   printf("\nuninitialized variable: %p",&unglobvar);
+   printf("\nuninitialized variable data: %d", unglobvar);
+   printf("\ncode segment: %p", &product);
+  printf("\ncode segment: %d", product);
+  free(p);
+  return 0;
+  }
