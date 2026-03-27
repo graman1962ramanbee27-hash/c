@@ -1,0 +1,43 @@
+
+/**
+ * Note: The returned array must be malloced, assume caller calls free().
+ */
+char** summaryRanges(int* nums, int numsSize, int* returnSize) {
+    if (numsSize == 0) {
+        *returnSize = 0;
+        return NULL;
+    }
+
+    // At most, we will have numsSize number of ranges
+    char** result = (char**)malloc(numsSize * sizeof(char*));
+    int count = 0;
+
+    int i = 0;
+    while (i < numsSize) {
+        int start_idx = i;
+
+        // Advance i as long as the next element is consecutive
+        // Use (long) to prevent overflow if nums[i] is INT_MAX
+        while (i + 1 < numsSize && (long)nums[i + 1] == (long)nums[i] + 1) {
+            i++;
+        }
+
+        // Allocate space for the string: 
+        // Max 32-bit int is 11 chars, so "int->int" + null is ~25 chars.
+        result[count] = (char*)malloc(32 * sizeof(char));
+
+        if (start_idx == i) {
+            // Case: Single number range
+            sprintf(result[count], "%d", nums[start_idx]);
+        } else {
+            // Case: Multi-number range
+            sprintf(result[count], "%d->%d", nums[start_idx], nums[i]);
+        }
+
+        count++;
+        i++; // Move to the element after the current range
+    }
+
+    *returnSize = count;
+    return result;
+}
