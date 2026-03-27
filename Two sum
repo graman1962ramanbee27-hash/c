@@ -1,0 +1,71 @@
+#include <stdlib.h>
+#include <stdbool.h>
+
+// 1. Define a large enough prime size for the hash table to reduce collisions
+#define HASH_SIZE 20003 
+
+typedef struct {
+    int key;    // The number from the array
+    int value;  // The index of that number
+    bool occupied;
+} HashItem;
+
+// 2. Simple hash function to map numbers to table indices
+int hash(int key) {
+    int h = key % HASH_SIZE;
+    // Handle negative results of the % operator in C
+    if (h < 0) h += HASH_SIZE;
+    return h;
+}
+
+// 3. Insert a key-value pair into the table using Linear Probing
+void insert(HashItem* table, int key, int val) {
+    int idx = hash(key);
+    while (table[idx].occupied) {
+        idx = (idx + 1) % HASH_SIZE;
+    }
+    table[idx].key = key;
+    table[idx].value = val;
+    table[idx].occupied = true;
+}
+
+// 4. Find the index associated with a key
+int find(HashItem* table, int key) {
+    int idx = hash(key);
+    while (table[idx].occupied) {
+        if (table[idx].key == key) {
+            return table[idx].value;
+        }
+        idx = (idx + 1) % HASH_SIZE;
+    }
+    return -1; // Not found
+}
+
+// 5. Main function
+int* twoSum(int* nums, int numsSize, int target, int* returnSize) {
+    // calloc initializes the memory to zero (setting 'occupied' to false)
+    HashItem* table = (HashItem*)calloc(HASH_SIZE, sizeof(HashItem));
+    
+    int* result = (int*)malloc(2 * sizeof(int));
+    *returnSize = 2;
+
+    for (int i = 0; i < numsSize; i++) {
+        int complement = target - nums[i];
+        
+        int complementIndex = find(table, complement);
+        
+        if (complementIndex != -1) {
+            result[0] = complementIndex;
+            result[1] = i;
+            free(table); // Free the hash table before returning
+            return result;
+        }
+        
+        insert(table, nums[i], i);
+    }
+
+    // Safety return (should not be reached per constraints)
+    free(table);
+    *returnSize = 0;
+    return NULL;
+}
