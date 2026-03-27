@@ -1,0 +1,28 @@
+
+bool isAnagram(char* s, char* t) {
+    int lenS = strlen(s);
+    int lenT = strlen(t);
+
+    // If lengths are different, they cannot be anagrams
+    if (lenS != lenT) {
+        return false;
+    }
+
+    // Frequency array for 'a' through 'z'
+    int counts[26] = {0};
+
+    // Increment for string s and decrement for string t
+    for (int i = 0; i < lenS; i++) {
+        counts[s[i] - 'a']++;
+        counts[t[i] - 'a']--;
+    }
+
+    // If all counts are zero, they are anagrams
+    for (int i = 0; i < 26; i++) {
+        if (counts[i] != 0) {
+            return false;
+        }
+    }
+
+    return true;
+}
