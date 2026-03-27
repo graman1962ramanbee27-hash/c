@@ -1,0 +1,73 @@
+
+// 1. Define Hash Table Size (Prime number > numsSize * 2)
+#define HASH_SIZE 300007
+
+typedef struct {
+    int key;
+    bool occupied;
+} HashEntry;
+
+// 2. Hash function handling large and negative numbers
+int getHash(long long key) {
+    int h = key % HASH_SIZE;
+    if (h < 0) h += HASH_SIZE;
+    return h;
+}
+
+// 3. Insert into the hash table
+void insert(HashEntry* table, int key) {
+    int h = getHash(key);
+    while (table[h].occupied) {
+        if (table[h].key == key) return; // Already exists
+        h = (h + 1) % HASH_SIZE;
+    }
+    table[h].key = key;
+    table[h].occupied = true;
+}
+
+// 4. Search the hash table
+bool contains(HashEntry* table, int key) {
+    int h = getHash(key);
+    while (table[h].occupied) {
+        if (table[h].key == key) return true;
+        h = (h + 1) % HASH_SIZE;
+    }
+    return false;
+}
+
+int longestConsecutive(int* nums, int numsSize) {
+    if (numsSize == 0) return 0;
+
+    // Allocate hash table
+    HashEntry* table = (HashEntry*)calloc(HASH_SIZE, sizeof(HashEntry));
+    
+    // Fill the hash table with all numbers from nums
+    for (int i = 0; i < numsSize; i++) {
+        insert(table, nums[i]);
+    }
+
+    int longestStreak = 0;
+
+    for (int i = 0; i < numsSize; i++) {
+        int currentNum = nums[i];
+
+        // 5. Optimization: Only start counting if currentNum is the START of a sequence
+        // We check if (currentNum - 1) is NOT in the set.
+        if (!contains(table, currentNum - 1)) {
+            int currentStreak = 1;
+
+            // Count how many consecutive numbers follow
+            while (contains(table, currentNum + 1)) {
+                currentNum += 1;
+                currentStreak += 1;
+            }
+
+            if (currentStreak > longestStreak) {
+                longestStreak = currentStreak;
+            }
+        }
+    }
+
+    free(table);
+    return longestStreak;
+}
