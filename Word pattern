@@ -1,0 +1,61 @@
+
+bool wordPattern(char* pattern, char* s) {
+    int patternLen = strlen(pattern);
+    
+    // Create a copy of s because strtok modifies the original string
+    char* sCopy = strdup(s);
+    char* words[300]; // Constraint says pattern length is max 300
+    int wordCount = 0;
+
+    // Tokenize the string s into an array of words
+    char* token = strtok(sCopy, " ");
+    while (token != NULL) {
+        if (wordCount < 300) {
+            words[wordCount++] = token;
+        } else {
+            // Safety: More words than pattern can handle
+            wordCount++; 
+            break;
+        }
+        token = strtok(NULL, " ");
+    }
+
+    // If counts don't match, it's not a bijection
+    if (wordCount != patternLen) {
+        free(sCopy);
+        return false;
+    }
+
+    // Mapping for characters 'a' through 'z'
+    char* map[26];
+    for (int i = 0; i < 26; i++) {
+        map[i] = NULL;
+    }
+
+    for (int i = 0; i < patternLen; i++) {
+        int idx = pattern[i] - 'a';
+        char* currentWord = words[i];
+
+        if (map[idx] == NULL) {
+            // Before mapping char to word, ensure this word isn't 
+            // already mapped to a different character
+            for (int j = 0; j < 26; j++) {
+                if (map[j] != NULL && strcmp(map[j], currentWord) == 0) {
+                    free(sCopy);
+                    return false;
+                }
+            }
+            // Create the mapping
+            map[idx] = currentWord;
+        } else {
+            // If mapping exists, it must match the current word
+            if (strcmp(map[idx], currentWord) != 0) {
+                free(sCopy);
+                return false;
+            }
+        }
+    }
+
+    free(sCopy);
+    return true;
+}
