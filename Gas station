@@ -1,0 +1,35 @@
+int canCompleteCircuit(int* gas, int gasSize, int* cost, int costSize) {
+    int total_surplus = 0;   // Overall balance of (gas - cost)
+    int current_tank = 0;    // Balance from the current starting point
+    int start_index = 0;     // Candidate for the starting station
+
+    for (int i = 0; i < gasSize; i++) {
+        int diff = gas[i] - cost[i];
+        total_surplus += diff;
+        current_tank += diff;
+
+        /* 
+           If current_tank becomes negative, it means we cannot reach 
+           station i+1 from our current start_index. Therefore, no 
+           station between the current start_index and i can be the 
+           correct starting point.
+        */
+        if (current_tank < 0) {
+            // Pick the next station as the new candidate
+            start_index = i + 1;
+            // Reset the tank for the new candidate
+            current_tank = 0;
+        }
+    }
+
+    /* 
+       If the total gas is less than the total cost, it's impossible 
+       to complete the circuit regardless of the starting point.
+    */
+    if (total_surplus < 0) {
+        return -1;
+    }
+
+    
+    return start_index;
+}
