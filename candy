@@ -1,0 +1,41 @@
+int candy(int* ratings, int ratingsSize) {
+    if (ratingsSize == 0) return 0;
+    if (ratingsSize == 1) return 1;
+
+    // Allocate memory for the candies count for each child
+    int* candies = (int*)malloc(ratingsSize * sizeof(int));
+    
+    // Step 1: Every child gets at least 1 candy
+    for (int i = 0; i < ratingsSize; i++) {
+        candies[i] = 1;
+    }
+
+    // Step 2: Forward pass (Left to Right)
+    // Satisfy the condition for the left neighbor
+    for (int i = 1; i < ratingsSize; i++) {
+        if (ratings[i] > ratings[i - 1]) {
+            candies[i] = candies[i - 1] + 1;
+        }
+    }
+
+    // Step 3: Backward pass (Right to Left)
+    // Satisfy the condition for the right neighbor
+    for (int i = ratingsSize - 2; i >= 0; i--) {
+        if (ratings[i] > ratings[i + 1]) {
+            // Use MAX to satisfy both left and right neighbor conditions
+            candies[i] = MAX(candies[i], candies[i + 1] + 1);
+        }
+    }
+
+    // Step 4: Calculate the total sum of candies
+    int totalCandies = 0;
+    for (int i = 0; i < ratingsSize; i++) {
+        totalCandies += candies[i];
+    }
+
+    // Clean up allocated memory
+    free(candies);
+
+    return totalCandies;
+}
+
