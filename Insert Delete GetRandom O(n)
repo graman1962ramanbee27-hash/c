@@ -1,0 +1,133 @@
+#include <stdlib.h>
+#include <stdbool.h>
+#include <time.h>
+
+// Hash Map Node for collision handling (Chaining)
+typedef struct HashNode {
+    int key;
+    int value; // Stores the index in the 'nums' array
+    struct HashNode* next;
+} HashNode;
+
+#define HASH_SIZE 10007
+
+typedef struct {
+    int* nums;
+    int size;
+    int capacity;
+    HashNode** table; // Hash Table: array of pointers to HashNodes
+} RandomizedSet;
+
+// Helper: Hash Function
+int getHash(int key) {
+    long long k = key;
+    int h = k % HASH_SIZE;
+    return (h < 0) ? h + HASH_SIZE : h;
+}
+
+// Helper: Find in Hash Map
+HashNode* find(RandomizedSet* obj, int key) {
+    int h = getHash(key);
+    HashNode* curr = obj->table[h];
+    while (curr) {
+        if (curr->key == key) return curr;
+        curr = curr->next;
+    }
+    return NULL;
+}
+
+// Helper: Insert into Hash Map
+void hashInsert(RandomizedSet* obj, int key, int val) {
+    int h = getHash(key);
+    HashNode* newNode = (HashNode*)malloc(sizeof(HashNode));
+    newNode->key = key;
+    newNode->value = val;
+    newNode->next = obj->table[h];
+    obj->table[h] = newNode;
+}
+
+// Helper: Delete from Hash Map
+void hashDelete(RandomizedSet* obj, int key) {
+    int h = getHash(key);
+    HashNode* curr = obj->table[h];
+    HashNode* prev = NULL;
+    while (curr) {
+        if (curr->key == key) {
+            if (prev) prev->next = curr->next;
+            else obj->table[h] = curr->next;
+            free(curr);
+            return;
+        }
+        prev = curr;
+        curr = curr->next;
+    }
+}
+
+// Helper: Update value in Hash Map
+void hashUpdate(RandomizedSet* obj, int key, int newVal) {
+    HashNode* node = find(obj, key);
+    if (node) node->value = newVal;
+}
+
+RandomizedSet* randomizedSetCreate() {
+    RandomizedSet* obj = (RandomizedSet*)malloc(sizeof(RandomizedSet));
+    obj->size = 0;
+    obj->capacity = 1000;
+    obj->nums = (int*)malloc(sizeof(int) * obj->capacity);
+    obj->table = (HashNode**)calloc(HASH_SIZE, sizeof(HashNode*));
+    srand(time(NULL));
+    return obj;
+}
+
+bool randomizedSetInsert(RandomizedSet* obj, int val) {
+    if (find(obj, val)) return false;
+
+    // Resize array if needed
+    if (obj->size == obj->capacity) {
+        obj->capacity *= 2;
+        obj->nums = (int*)realloc(obj->nums, sizeof(int) * obj->capacity);
+    }
+
+    // Add to array and hash map
+    obj->nums[obj->size] = val;
+    hashInsert(obj, val, obj->size);
+    obj->size++;
+    return true;
+}
+
+bool randomizedSetRemove(RandomizedSet* obj, int val) {
+    HashNode* node = find(obj, val);
+    if (!node) return false;
+
+    int indexToRemove = node->value;
+    int lastVal = obj->nums[obj->size - 1];
+
+    // Swap: Move the last element to the position of the element to delete
+    obj->nums[indexToRemove] = lastVal;
+    
+    // Update the index of the moved element in the Hash Map
+    hashUpdate(obj, lastVal, indexToRemove);
+
+    // Remove the val from Hash Map and decrease array size
+    hashDelete(obj, val);
+    obj->size--;
+    return true;
+}
+
+int randomizedSetGetRandom(RandomizedSet* obj) {
+    return obj->nums[rand() % obj->size];
+}
+
+void randomizedSetFree(RandomizedSet* obj) {
+    for (int i = 0; i < HASH_SIZE; i++) {
+        HashNode* curr = obj->table[i];
+        while (curr) {
+            HashNode* temp = curr;
+            curr = curr->next;
+            free(temp);
+        }
+    }
+    free(obj->table);
+    free(obj->nums);
+    free(obj);
+}
